@@ -96,14 +96,28 @@ export default function TradingDashboard() {
           description: "Trading instrument added successfully",
         })
       } else {
-        throw new Error("Failed to create instrument")
+        const errorData = await response.json()
+        let errorMessage = "Failed to add trading instrument"
+
+        if (response.status === 400 && errorData.details) {
+          // Validation errors
+          errorMessage = errorData.details.join(", ")
+        } else if (response.status === 409) {
+          // Duplicate symbol error
+          errorMessage = errorData.error
+        } else if (errorData.error) {
+          errorMessage = errorData.error
+        }
+
+        throw new Error(errorMessage)
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to add trading instrument",
+        description: error.message || "Failed to add trading instrument",
         variant: "destructive",
       })
+      throw error
     } finally {
       setIsLoading(false)
     }
@@ -129,14 +143,24 @@ export default function TradingDashboard() {
           description: "Trading instrument updated successfully",
         })
       } else {
-        throw new Error("Failed to update instrument")
+        const errorData = await response.json()
+        let errorMessage = "Failed to update trading instrument"
+
+        if (response.status === 400 && errorData.details) {
+          errorMessage = errorData.details.join(", ")
+        } else if (errorData.error) {
+          errorMessage = errorData.error
+        }
+
+        throw new Error(errorMessage)
       }
-    } catch (error) {
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to update trading instrument",
+        description: error.message || "Failed to update trading instrument",
         variant: "destructive",
       })
+      throw error
     } finally {
       setIsLoading(false)
     }
